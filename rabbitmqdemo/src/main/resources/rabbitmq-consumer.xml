@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/rabbit
+http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--组件扫描，需要添加pom依赖 spring-context -->
+    <context:component-scan base-package="com.rabbitmqdemo.spring_rabbitMQ.Listener"/>
+    <!--配置连接-->
+    <rabbit:connection-factory
+            id="connectionFactory"
+            host="127.0.0.1"
+            port="5672"
+            username="yh"
+            password="yh"
+            virtual-host="/yhhost"/>
+    <!-- 配置 rabbitmq管理端 -->
+    <rabbit:admin connection-factory="connectionFactory"></rabbit:admin>
+    <!--配置队列名（如果不存在则创建）-->
+    <!-- 配置消息队列 接收发送短信通知的队列 -->
+    <rabbit:queue name="queue_msg_sms" />
+    <!-- 配置消息队列 接收发送邮件通知的队列 -->
+    <rabbit:queue name="queue_msg_mail" />
+    <!--配置监听-->
+    <rabbit:listener-container connection-factory="connectionFactory">
+        <!-- 配置监听器对象和要监听的队列的绑定 -->
+        <!-- smsListener即SmsListener类 -->
+        <rabbit:listener ref="smsListener" queue-names="queue_msg_sms" />
+        <rabbit:listener ref="emailListener" queue-names="queue_msg_mail"/>
+    </rabbit:listener-container>
+
+    <!-- Jackson -->
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+</beans>
